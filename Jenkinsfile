@@ -3,7 +3,10 @@ pipeline{
         label 'DevNode'
     }
     parameters {
-    string defaultValue: 'Somasundaram', name: 'LASTNAME'
+    parameters {
+    choice choices: ['Dev', 'Prod'], name: 'Environment'
+    }
+
     }
     environment{
         NAME="Shankar"
@@ -17,21 +20,28 @@ pipeline{
             steps{
                 echo "checking push"
                 echo "Running mvn"               
-                sh 'mvn clean package'
-                echo "Hello $NAME ${params.LASTNAME}"
+                sh 'mvn clean package -DskipTests=true'                
             }
         }
         stage(test){
             parallel {
                 stage('testA'){
+                    agent {
+                        label 'DevNode'
+                    }
                     steps{
                         echo "This is stage A"
+                        sh 'mvn test'  
                     }
                     
                 }
                 stage('testB'){
+                    agent {
+                        label 'DevNode'
+                    }                    
                     steps{
                         echo "This is stage B"
+                        sh 'mvn test'  
                     }
                     
                 }
@@ -39,10 +49,31 @@ pipeline{
             post {
             success {
                 // One or more steps need to be included within each condition's block.
-                archiveArtifacts artifacts: '**/target/*.war'
+                dir("webapp/target/")
+                {
+                    stash includes: '*.war', name: 'maven-build'
+                }
             }
             }            
         }
+    stage(deploy){
+        when{
+            expression {
+                {params.environment == 'dev'}
+                beforeAgent true
+            }
+            agent{label 'DevNode'}
+            steps{
+                dir("/var/www/html"){
+                    unstash 'maven-build'
+                }
+                sh """
+                cd /var/www/html/
+                jar -xvf webapp.war
+                """
+            }
+        }
+    }
 
     }
     
