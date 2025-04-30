@@ -1,10 +1,9 @@
 pipeline{
     agent {
         label 'DevNode'
-    }
+    }    
     parameters {
-    parameters {
-    choice choices: ['Dev', 'Prod'], name: 'Environment'
+        choice choices: ['Dev', 'Prod'], name: 'Environment'
     }
 
     }
