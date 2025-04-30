@@ -70,9 +70,11 @@ pipeline {
                 label 'DevNode'
             }
             steps {
-                timeout(time:5,unit:'DAYS'){
-                    input message: 'Deployment Approved?'
-                }
+                script {
+                        timeout(time: 5, unit: 'DAYS') {
+                            input message: 'Deployment Approved?'
+                        }
+                    }
                    
                 dir("/var/www/html") {
                     unstash 'maven-build'
