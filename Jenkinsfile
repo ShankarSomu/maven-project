@@ -2,6 +2,13 @@ pipeline{
     agent {
         label 'DevNode'
     }
+    parameters {
+    string defaultValue: 'Shankar', name: 'LASTNAME'
+    }
+
+    environment{
+        NAME="Shankar"
+    }
     tools {
     maven 'MyMaven'
     }
@@ -12,6 +19,7 @@ pipeline{
                 echo "checking push"
                 echo "Running mvn"               
                 sh 'mvn clean package'
+                echo "Hello $NAME ${params.LASTNAME}"
             }
             post {
             success {
