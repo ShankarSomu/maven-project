@@ -59,7 +59,7 @@ pipeline{
     stage(deploy){
         when{
             expression {
-                {params.environment == 'dev'}
+                {params.Environment == 'dev'}
                 beforeAgent true
             }
             agent{label 'DevNode'}
