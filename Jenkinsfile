@@ -18,6 +18,10 @@ pipeline {
     stages {
         stage('build') {
             steps {
+                script{
+                    file = load "script.groovy"
+                    file.hello()
+                }
                 echo "checking push"
                 echo "Running mvn"
                 sh 'mvn clean package -DskipTests=true'
@@ -66,6 +70,10 @@ pipeline {
                 label 'DevNode'
             }
             steps {
+                timeout(time:5,unit:'DAYS'){
+                    input mesage: 'Deployment Approved?'
+                }
+                   
                 dir("/var/www/html") {
                     unstash 'maven-build'
                 }
