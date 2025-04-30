@@ -20,13 +20,30 @@ pipeline{
                 sh 'mvn clean package'
                 echo "Hello $NAME ${params.LASTNAME}"
             }
+        }
+        stage(test){
+            parallel {
+                stage('testA'){
+                    steps{
+                        echo "This is stage A"
+                    }
+                    
+                }
+                stage('testB'){
+                    steps{
+                        echo "This is stage B"
+                    }
+                    
+                }
+            }
             post {
             success {
                 // One or more steps need to be included within each condition's block.
                 archiveArtifacts artifacts: '**/target/*.war'
             }
-            }
+            }            
         }
+
     }
     
 }
