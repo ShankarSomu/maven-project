@@ -71,7 +71,7 @@ pipeline {
             }
             steps {
                 timeout(time:5,unit:'DAYS'){
-                    input mesage: 'Deployment Approved?'
+                    input message: 'Deployment Approved?'
                 }
                    
                 dir("/var/www/html") {
