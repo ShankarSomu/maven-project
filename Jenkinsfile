@@ -3,9 +3,8 @@ pipeline{
         label 'DevNode'
     }
     parameters {
-    string defaultValue: 'Shankar', name: 'LASTNAME'
+    string defaultValue: 'Somasundaram', name: 'LASTNAME'
     }
-
     environment{
         NAME="Shankar"
     }
