@@ -1,79 +1,79 @@
-pipeline{
+pipeline {
     agent {
         label 'DevNode'
-    }    
+    }
+
     parameters {
         choice choices: ['Dev', 'Prod'], name: 'Environment'
     }
 
-    }
-    environment{
-        NAME="Shankar"
-    }
-    tools {
-    maven 'MyMaven'
+    environment {
+        NAME = "Shankar"
     }
 
-    stages{
-        stage('build'){
-            steps{
+    tools {
+        maven 'MyMaven'
+    }
+
+    stages {
+        stage('build') {
+            steps {
                 echo "checking push"
-                echo "Running mvn"               
-                sh 'mvn clean package -DskipTests=true'                
+                echo "Running mvn"
+                sh 'mvn clean package -DskipTests=true'
             }
         }
-        stage(test){
+
+        stage('test') {
             parallel {
-                stage('testA'){
+                stage('testA') {
                     agent {
                         label 'DevNode'
                     }
-                    steps{
+                    steps {
                         echo "This is stage A"
-                        sh 'mvn test'  
+                        sh 'mvn test'
                     }
-                    
                 }
-                stage('testB'){
+                stage('testB') {
                     agent {
                         label 'DevNode'
-                    }                    
-                    steps{
-                        echo "This is stage B"
-                        sh 'mvn test'  
                     }
-                    
+                    steps {
+                        echo "This is stage B"
+                        sh 'mvn test'
+                    }
                 }
             }
-            post {
-            success {
-                // One or more steps need to be included within each condition's block.
-                dir("webapp/target/")
-                {
+        }
+
+        stage('stash-artifact') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                dir("webapp/target/") {
                     stash includes: '*.war', name: 'maven-build'
                 }
             }
-            }            
         }
-    stage(deploy){
-        when{
-            expression {
-                {${params.Environment} == 'dev'}
-                beforeAgent true
+
+        stage('deploy') {
+            when {
+                expression { params.Environment == 'Dev' }
             }
-            agent{label 'DevNode'}
-            steps{
-                dir("/var/www/html"){
+            agent {
+                label 'DevNode'
+            }
+            steps {
+                dir("/var/www/html") {
                     unstash 'maven-build'
                 }
                 sh """
-                cd /var/www/html/
-                jar -xvf webapp.war
+                    cd /var/www/html
+                    jar -xvf webapp.war
                 """
             }
         }
     }
-
-    }
-    
 }
